@@ -5,17 +5,15 @@ import TravelItemCard from "../travel-item-card/travel-item-card";
 
 interface TravelItemsListProps {
   travelList: TravelItem[];
+  handleSaveItem: (travelItem: TravelItem) => void;
+  handleDeleteItem: (travelItemId: string) => void;
 }
 
-const TravelItemsList: React.FC<TravelItemsListProps> = ({ travelList }) => {
-  const handleEdit = (itemId: string) => {
-    console.log("Edit clicked", itemId);
-  };
-
-  const handleDelete = (itemId: string) => {
-    console.log("Delete clicked", itemId);
-  };
-
+const TravelItemsList: React.FC<TravelItemsListProps> = ({
+  travelList,
+  handleSaveItem,
+  handleDeleteItem,
+}) => {
   return (
     <div className="max-w-4xl mx-auto mt-8">
       <div className="max-w-4xl mx-auto mt-8">
@@ -24,12 +22,9 @@ const TravelItemsList: React.FC<TravelItemsListProps> = ({ travelList }) => {
           {travelList.map((item) => (
             <TravelItemCard
               key={item.id}
-              itemId={item.id}
-              imageSrc={item.photo_url}
-              title={item.title}
-              description={item.description}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              tripItem={item}
+              onSaveItem={handleSaveItem}
+              onDelete={handleDeleteItem}
             />
           ))}
         </div>
