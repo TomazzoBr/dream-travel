@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Button from "../shared-components/button/button";
-import { useState } from "react";
-import TripModal from "../trip-modal/trip-modal";
+import React from "react";
 
-export default function Header() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+interface HeaderProps {
+  setIsDialogCreateItemOpen: (isOpen: boolean) => void;
+}
 
+const Header: React.FC<HeaderProps> = ({ setIsDialogCreateItemOpen }) => {
   return (
     <header className="flex justify-between items-center bg-black text-white px-6 py-4 rounded-lg">
       <div className="flex items-center">
@@ -25,9 +26,11 @@ export default function Header() {
       <Button
         text="Create new trip"
         mode="light"
-        onClick={() => setIsModalOpen(true)}
+        type="button"
+        onClick={() => setIsDialogCreateItemOpen(true)}
       />
-      <TripModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </header>
   );
-}
+};
+
+export default Header;
