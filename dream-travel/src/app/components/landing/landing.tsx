@@ -1,53 +1,15 @@
 "use client";
 
-import { TravelItem } from "@/app/lib/types/travel.type";
 import TravelItemsList from "../travel-items-list/travel-items-list";
 import Header from "../header/header";
 import Search from "../search/search";
 import Filters from "../filters/filters";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Filter } from "@/app/lib/types/filters.types";
-
-const mockTravelItems: TravelItem[] = [
-  {
-    id: "1",
-    title: "Portugal",
-    description:
-      "Classic tour of Portugal's vibrant cities and cultural heritage, including Lisbon, Porto, Fatima, and the flamboyant architecture of Sintra.",
-    photo_url: "https://via.placeholder.com/300x200",
-    introduction: "Discover the best of Portugal!",
-    status: "todo",
-    itinerary: [
-      {
-        day: "1",
-        location: "Lisbon",
-        description: "Explore the capital city.",
-      },
-      {
-        day: "2",
-        location: "Porto",
-        description: "Wine tasting and river tour.",
-      },
-    ],
-  },
-  {
-    id: "2",
-    title: "Italy",
-    description:
-      "A journey through Italy’s iconic cities, including Rome, Venice, and Florence, with culinary and cultural experiences.",
-    photo_url: "https://via.placeholder.com/300x200",
-    introduction: "Experience the beauty of Italy!",
-    status: "done",
-    itinerary: [
-      { day: "1", location: "Rome", description: "Visit the Colosseum." },
-      {
-        day: "2",
-        location: "Venice",
-        description: "Gondola ride through canals.",
-      },
-    ],
-  },
-];
+import { getTrips } from "@/services/tripService";
+import { TravelItem } from "@/app/lib/types/travel.type";
+import TripModalForm from "../trip-modal-form/trip-modal-form";
+import { v4 as uuidv4 } from "uuid";
 
 const filters: Filter[] = [
   { title: "All", value: "all" },
@@ -57,15 +19,65 @@ const filters: Filter[] = [
 
 export default function Landing() {
   const defaultFilter = filters[0];
+  const [isDialogCreateItemOpen, setIsDialogCreateItemOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<Filter>(defaultFilter);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredItemsSearch, setFilteredItemsSearch] =
-    useState(mockTravelItems);
+  const [tripsItems, setTripsItems] = useState<TravelItem[]>([]);
+  const [filteredItemsSearch, setFilteredItemsSearch] = useState<TravelItem[]>(
+    []
+  );
+
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        const storedTrips = localStorage.getItem("trips");
+
+        if (storedTrips) {
+          const parsedTrips = JSON.parse(storedTrips);
+          setTripsItems(parsedTrips);
+          setFilteredItemsSearch(parsedTrips);
+        } else {
+          const data = await getTrips();
+          setTripsItems(data);
+          setFilteredItemsSearch(data);
+          localStorage.setItem("trips", JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error("Error fetching trips:", error);
+      }
+    };
+
+    fetchTrips();
+  }, []);
+
+  const handleSaveTrip = (trip: TravelItem) => {
+    let updatedTrips;
+
+    if (trip.id) {
+      updatedTrips = tripsItems.map((existingTrip) =>
+        existingTrip.id === trip.id ? trip : existingTrip
+      );
+    } else {
+      const newTrip = { ...trip, id: uuidv4() };
+      updatedTrips = [...tripsItems, newTrip];
+    }
+
+    setTripsItems(updatedTrips);
+    setFilteredItemsSearch(updatedTrips);
+    localStorage.setItem("trips", JSON.stringify(updatedTrips));
+  };
+
+  const handleDeleteTrip = (id: string) => {
+    const updatedTrips = tripsItems.filter((trip) => trip.id !== id);
+    setTripsItems(updatedTrips);
+    setFilteredItemsSearch(updatedTrips);
+    localStorage.setItem("trips", JSON.stringify(updatedTrips));
+  };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
 
-    const filtered = mockTravelItems.filter(
+    const filtered = tripsItems.filter(
       (item) =>
         item.title.toLowerCase().includes(query.toLowerCase()) ||
         item.description.toLowerCase().includes(query.toLowerCase()) ||
@@ -77,10 +89,13 @@ export default function Landing() {
   };
 
   const handleFilters = (filter: Filter) => {
-    setActiveFilter(filter);
+    if (filter.value === "all" && !searchQuery) {
+      setFilteredItemsSearch(tripsItems);
+      return;
+    }
 
     const baseList = searchQuery
-      ? mockTravelItems.filter(
+      ? tripsItems.filter(
           (item) =>
             item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.description
@@ -88,17 +103,18 @@ export default function Landing() {
               .includes(searchQuery.toLowerCase()) ||
             item.introduction.toLowerCase().includes(searchQuery.toLowerCase())
         )
-      : mockTravelItems;
+      : tripsItems;
 
     const filtered = baseList.filter((item) =>
       item.status.toLowerCase().includes(filter.value)
     );
 
+    setActiveFilter(filter);
     setFilteredItemsSearch(filtered);
   };
   return (
     <div className="w-full p-6">
-      <Header />
+      <Header setIsDialogCreateItemOpen={setIsDialogCreateItemOpen} />
       <Search onSearch={handleSearch} />
       <Filters
         filters={filters}
@@ -106,7 +122,16 @@ export default function Landing() {
         onFilterChange={handleFilters}
         setActiveFilter={setActiveFilter}
       />
-      <TravelItemsList travelList={filteredItemsSearch} />
+      <TravelItemsList
+        travelList={filteredItemsSearch}
+        handleSaveItem={handleSaveTrip}
+        handleDeleteItem={handleDeleteTrip}
+      />
+      <TripModalForm
+        isOpen={isDialogCreateItemOpen}
+        onClose={() => setIsDialogCreateItemOpen(false)}
+        onSave={handleSaveTrip}
+      />
     </div>
   );
 }
