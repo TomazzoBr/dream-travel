@@ -41,7 +41,12 @@ export default function Search({
           placeholder="Search trips"
           className="flex-1 px-4 py-2 text-gray-700 outline-none"
         />
-        <Button text="Search" mode="dark" onClick={() => handleSearchClick()} />
+        <Button
+          text="Search"
+          mode="dark"
+          onClick={() => handleSearchClick()}
+          type={"button"}
+        />
       </div>
     </div>
   );
