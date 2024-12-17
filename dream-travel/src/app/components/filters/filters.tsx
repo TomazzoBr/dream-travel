@@ -36,6 +36,7 @@ const Filters: React.FC<FilterButtonsProps> = ({
                 ? "bg-gray-100 text-black"
                 : "bg-white text-gray-600"
             }`}
+            data-testid="filter-item"
           >
             {filter.title}
           </button>
