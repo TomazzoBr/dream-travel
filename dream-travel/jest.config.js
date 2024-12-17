@@ -7,6 +7,7 @@ module.exports = {
   },
   moduleNameMapper: {
     "\\.module\\.scss$": "identity-obj-proxy",
+    "^@/(.*)$": "<rootDir>/src/$1",
   },
   transformIgnorePatterns: [
     "/node_modules/(?!your-module-to-transform).+\\.js$",
