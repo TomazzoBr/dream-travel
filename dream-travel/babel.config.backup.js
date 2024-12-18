@@ -4,4 +4,10 @@ module.exports = {
     "@babel/preset-react",
     "@babel/preset-typescript",
   ],
+  overrides: [
+    {
+      test: /\.mjs$/,
+      compact: false,
+    },
+  ],
 };

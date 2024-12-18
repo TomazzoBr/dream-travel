@@ -9,6 +9,19 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.mjs$/,
+      exclude: /node_modules\/react-icons\/fa/,
+      use: {
+        loader: "babel-loader",
+        options: {
+          compact: false,
+        },
+      },
+    });
+    return config;
+  },
 };
 
 export default nextConfig;
