@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import TripDetailsDialog from "../trip-details-dialog/trip-details-dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TravelItem } from "@/app/lib/types/travel.type";
 import styles from "./travel-item-card.module.scss";
 import TripModalForm from "../trip-modal-form/trip-modal-form";
@@ -21,6 +21,24 @@ const TravelItemCard: React.FC<TravelItemCardProps> = ({
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isDialogEditOpen, setDialogEditOpen] = useState(false);
   const [trip, setTrip] = useState<TravelItem | null>(tripItem);
+  const [imageSrc, setImageSrc] = useState(
+    "https://via.placeholder.com/300x200"
+  );
+
+  useEffect(() => {
+    if (tripItem?.photo_url && isValidUrl(tripItem.photo_url)) {
+      setImageSrc(tripItem.photo_url);
+    }
+  }, [tripItem?.photo_url]);
+
+  const isValidUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const handleMarkAsCompleted = (id: string) => {
     if (trip && trip.id === id) {
@@ -34,11 +52,12 @@ const TravelItemCard: React.FC<TravelItemCardProps> = ({
     >
       <div className="w-1/2">
         <Image
-          src={tripItem.photo_url}
+          src={imageSrc}
           alt={tripItem.title}
           className="rounded-tl-lg rounded-bl-lg object-cover object-center"
           width={464}
           height={206}
+          onError={() => setImageSrc("https://via.placeholder.com/300x200")}
         />
       </div>
 

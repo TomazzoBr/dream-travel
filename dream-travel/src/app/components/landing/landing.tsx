@@ -26,6 +26,7 @@ export default function Landing() {
   const [filteredItemsSearch, setFilteredItemsSearch] = useState<TravelItem[]>(
     []
   );
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -51,11 +52,13 @@ export default function Landing() {
   }, []);
 
   const handleSaveTrip = (trip: TravelItem) => {
-    let updatedTrips;
+    let updatedTrips: TravelItem[];
 
     if (trip.id) {
       updatedTrips = tripsItems.map((existingTrip) =>
-        existingTrip.id === trip.id ? trip : existingTrip
+        existingTrip.id === trip.id
+          ? { ...existingTrip, ...trip }
+          : existingTrip
       );
     } else {
       const newTrip = { ...trip, id: uuidv4() };
@@ -65,6 +68,7 @@ export default function Landing() {
     setTripsItems(updatedTrips);
     setFilteredItemsSearch(updatedTrips);
     localStorage.setItem("trips", JSON.stringify(updatedTrips));
+    setRefreshKey((prevKey) => prevKey + 1);
   };
 
   const handleDeleteTrip = (id: string) => {
@@ -112,6 +116,7 @@ export default function Landing() {
     setActiveFilter(filter);
     setFilteredItemsSearch(filtered);
   };
+
   return (
     <div className="w-full p-6">
       <Header setIsDialogCreateItemOpen={setIsDialogCreateItemOpen} />
@@ -123,6 +128,7 @@ export default function Landing() {
         setActiveFilter={setActiveFilter}
       />
       <TravelItemsList
+        key={refreshKey}
         travelList={filteredItemsSearch}
         handleSaveItem={handleSaveTrip}
         handleDeleteItem={handleDeleteTrip}

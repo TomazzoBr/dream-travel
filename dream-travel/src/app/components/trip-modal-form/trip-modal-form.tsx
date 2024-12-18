@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { GoPlusCircle } from "react-icons/go";
-import styles from "./trip-modal.module.scss";
+import styles from "./trip-modal-form.module.scss";
 import { Itinerary, TravelItem } from "@/app/lib/types/travel.type";
 
 interface TripModalFormProps {
@@ -21,7 +21,7 @@ const TripModalForm: React.FC<TripModalFormProps> = ({
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
   const [itineraries, setItineraries] = useState<Itinerary[]>([
-    { day: "", location: "", description: "" },
+    { day: null, location: "", description: "" },
   ]);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,13 +43,13 @@ const TripModalForm: React.FC<TripModalFormProps> = ({
     setIntroduction("");
     setDescription("");
     setImage("");
-    setItineraries([{ day: "", location: "", description: "" }]);
+    setItineraries([{ day: null, location: "", description: "" }]);
   };
 
   const handleAddItinerary = () => {
     setItineraries([
       ...itineraries,
-      { day: "", location: "", description: "" },
+      { day: null, location: "", description: "" },
     ]);
   };
 
@@ -59,10 +59,15 @@ const TripModalForm: React.FC<TripModalFormProps> = ({
     value: string
   ) => {
     const updatedItineraries = [...itineraries];
-    updatedItineraries[index][field] = value;
+
+    if (field === "day") {
+      updatedItineraries[index][field] = value === "" ? null : Number(value);
+    } else {
+      updatedItineraries[index][field] = value;
+    }
+
     setItineraries(updatedItineraries);
   };
-
   const validateForm = () => {
     if (!title || !introduction || !description || !image) {
       setError("Please fill out all fields.");
@@ -209,7 +214,7 @@ const TripModalForm: React.FC<TripModalFormProps> = ({
                 <div className="flex items-center gap-2">
                   <select
                     className="px-4 py-2 border rounded-2xl text-black focus:outline-none focus:ring-2 focus:ring-gray-300"
-                    value={itinerary.day}
+                    value={itinerary.day?.toString()}
                     onChange={(e) =>
                       handleItineraryChange(index, "day", e.target.value)
                     }

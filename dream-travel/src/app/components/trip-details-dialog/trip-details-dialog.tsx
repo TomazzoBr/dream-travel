@@ -2,6 +2,7 @@ import { TravelItem } from "@/app/lib/types/travel.type";
 import { FaCheckCircle } from "react-icons/fa";
 import { MdClose } from "react-icons/md";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 type TripDetailsDialogProps = {
   open: boolean;
@@ -16,6 +17,25 @@ export default function TripDetailsDialog({
   trip,
   onMarkAsCompleted,
 }: TripDetailsDialogProps) {
+  const [imageSrc, setImageSrc] = useState(
+    "https://via.placeholder.com/300x200"
+  );
+
+  useEffect(() => {
+    if (trip?.photo_url && isValidUrl(trip.photo_url)) {
+      setImageSrc(trip.photo_url);
+    }
+  }, [trip?.photo_url]);
+
+  const isValidUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -23,7 +43,7 @@ export default function TripDetailsDialog({
       <div className="h-[90%] bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-scroll">
         <div className="relative">
           <Image
-            src={trip.photo_url}
+            src={imageSrc}
             alt={trip.title}
             className="w-full h-48 object-cover"
             width={640}

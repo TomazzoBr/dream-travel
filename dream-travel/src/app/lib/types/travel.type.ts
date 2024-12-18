@@ -9,7 +9,7 @@ export type TravelItem = {
 };
 
 export type Itinerary = {
-  day: string;
+  day: number | null;
   location: string;
   description: string;
 };
